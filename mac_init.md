@@ -1,7 +1,8 @@
 # Setup Developer macOS
 
-- [macOS Tools](##macos-tools)
-- [Packages and Softwares](##packages-and-softwares)
+Outline:
+- [macOS Tools](#macos-tools)
+- [Packages and Softwares](#packages-and-softwares)
 
 ## macOS Tools
 

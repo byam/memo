@@ -24,6 +24,7 @@ Outline:
 
 - [oh-my-zsh](https://github.com/robbyrussell/oh-my-zsh)
 - [brew](https://brew.sh/index_ja.html)
+- [peco](https://github.com/peco/peco)
 - git
   - [set email](https://help.github.com/articles/setting-your-commit-email-address-in-git/)
 - [docker](https://www.docker.com/docker-mac)
@@ -31,10 +32,10 @@ Outline:
   - [Anaconda](https://www.anaconda.com/download/#macos)
 - [java](./java.md)
 - [ruby](https://byam.github.io/how-to/2017/10/24/install-ruby.html)
-- [go]()
+- [go](https://golang.org/dl/)
 - [jekyll](https://jekyllrb.com/docs/installation/)
 - [gcloud SDK](https://cloud.google.com/sdk/docs/quickstart-mac-os-x?hl=ja)
 - [aws cli]()
-- [terraform]()
-- [ansible]()
+- [terraform](https://www.terraform.io/downloads.html)
+- [ansible](http://docs.ansible.com/ansible/latest/intro_installation.html#latest-releases-on-mac-osx)
 - [kubectl]()

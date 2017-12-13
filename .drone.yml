@@ -18,6 +18,4 @@ pipeline:
     commands:
       - echo "Hello Byam."
     when:
-      branch:
-        include: "feature/*"
       event: push

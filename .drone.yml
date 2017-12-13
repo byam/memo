@@ -1,18 +1,16 @@
 pipeline:
 
   prepare:
-    image: asia.gcr.io/rls-blt-dev/drone-build:latest
+    image: ubuntu
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
-    commands:
-      - gcloud docker -- pull asia.gcr.io/rls-blt-dev/drone-build:latest
 
 # ==============================================
 # Build
 # ----------------------------------------------
 
   push:
-    image: asia.gcr.io/rls-blt-dev/drone-build:latest
+    image: ubuntu
     environment:
       - ENV=dev
     commands:

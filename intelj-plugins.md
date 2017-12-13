@@ -6,7 +6,6 @@
 - [.env files support](https://plugins.jetbrains.com/plugin/9525--env-files-support)
 - [Kubernetes and OpenShift Resource Support](https://plugins.jetbrains.com/plugin/9354-kubernetes-and-openshift-resource-support)
 - [YAML/Ansible support](https://plugins.jetbrains.com/plugin/7792-yaml-ansible-support)
-- [jenkinsfile-idea-plugin](https://github.com/oliverlockwood/jenkinsfile-idea-plugin)
 - [bashsupport](https://www.plugin-dev.com/project/bashsupport/)
 - [Docker](https://www.jetbrains.com/help/idea/docker.html)
 - []()

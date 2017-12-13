@@ -39,3 +39,8 @@ Outline:
 - [aws cli](http://docs.aws.amazon.com/ja_jp/cli/latest/userguide/cli-install-macos.html)
 - [terraform](https://www.terraform.io/downloads.html)
 - [ansible](http://docs.ansible.com/ansible/latest/intro_installation.html#latest-releases-on-mac-osx)
+- [groovy SDK](http://groovy-lang.org/install.html#_installation_on_mac_os_x)
+- [drone](http://docs.drone.io/cli-installation/)
+- [vagrant](https://www.vagrantup.com/downloads.html)
+- [packer](https://www.packer.io/downloads.html)
+- [virtualbox](https://www.virtualbox.org/wiki/Downloads)

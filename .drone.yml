@@ -15,6 +15,7 @@ pipeline:
       - ENV=dev
     commands:
       - echo "Hello Byam."
+      - echo "Hello Byam."
     when:
       event: push
 

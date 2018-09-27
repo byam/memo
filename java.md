@@ -1,3 +1,7 @@
+# Java Notes
+
+- [Effective Java](java/effective-java/effective_java_3rd.md)
+
 ## Installing Java
 
 ① Download from here

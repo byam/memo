@@ -36,3 +36,9 @@ Book
 - Combines the **safety** of the **telescoping constructor pattern** with the **readability** of **the JavaBeans pattern**.  
 - Instead of making the desired object directly, the client calls a constructor (or static factory) with all of the required parameters and gets a builder object.
 - The Builder pattern simulates named optional parameters as found in Python and Scala.
+
+### Singleton
+
+- A singleton is simply a class that is instantiated exactly once. 
+- Singletons typically represent either a stateless object such as a *function* or a *system component* that is intrinsically unique. 
+- Making a class a singleton can make it difficult to test its clients because it’s impossible to substitute a mock implementation for a singleton unless it implements an interface that serves as its type.

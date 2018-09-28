@@ -2,6 +2,7 @@
 
 - [ITEM 1: CONSIDER STATIC FACTORY METHODS INSTEAD OF CONSTRUCTORS](#item-1-consider-static-factory-methods-instead-of-constructors)
 - [ITEM 2: CONSIDER A BUILDER WHEN FACED WITH MANY CONSTRUCTOR PARAMETERS](#item-2-consider-a-builder-when-faced-with-many-constructor-parameters)
+- [ITEM 3: ENFORCE THE SINGLETON PROPERTY WITH A PRIVATE CONSTRUCTOR OR AN ENUM TYPE](#item-3-enforce-the-singleton-property-with-a-private-constructor-or-an-enum-type)
 
 ## ITEM 1: CONSIDER STATIC FACTORY METHODS INSTEAD OF CONSTRUCTORS
 
@@ -151,7 +152,6 @@ NutritionFacts cocaCola = new NutritionFacts.Builder(240, 8).calories(100).sodiu
 
 - The Builder pattern is well suited to class hierarchies.
     > Use a parallel hierarchy of builders, each nested in the corresponding class. Abstract classes have abstract builders; concrete classes have concrete builders.
-- asda
 
 ### Item 2: Disadvantages
 
@@ -165,4 +165,121 @@ NutritionFacts cocaCola = new NutritionFacts.Builder(240, 8).calories(100).sodiu
 **the Builder pattern** is a good choice when designing classes whose *constructors* or *static factories* would have more than a handful of parameters, especially if many of the parameters are optional or of identical type. 
 
 Client code is much easier to read and write with builders than with telescoping constructors, and builders are much safer than JavaBeans.
+
+## ITEM 3: ENFORCE THE SINGLETON PROPERTY WITH A PRIVATE CONSTRUCTOR OR AN ENUM TYPE
+
+There are two common ways to implement singletons. Both are based on keeping the constructor private and exporting a public static member to provide access to the sole instance.
+
+- Approach 1: The public member is a **final field**
+
+```java
+// Singleton with public final field
+public class Elvis {
+    private static final Elvis INSTANCE = new Elvis();
+    private Elvis() { }
+    public static Elvis getInstance() { return INSTANCE; }
+
+    public void leaveTheBuilding() {
+        System.out.println("Whoa baby, I'm outta here!");
+    }
+
+    // This code would normally appear outside the class!
+    public static void main(String[] args) {
+        Elvis elvis = Elvis.getInstance();
+        elvis.leaveTheBuilding();
+    }
+}
+```
+
+- Approach 2: The public member is a **static factory method**
+
+```java
+// Singleton with static factory
+public class Elvis {
+    public static final Elvis INSTANCE = new Elvis();
+
+    private Elvis() { }
+
+    public void leaveTheBuilding() {
+        System.out.println("Whoa baby, I'm outta here!");
+    }
+
+    // This code would normally appear outside the class!
+    public static void main(String[] args) {
+        Elvis elvis = Elvis.INSTANCE;
+        elvis.leaveTheBuilding();
+    }
+}
+```
+
+> To make a singleton class that uses either of these approaches serializable, it is not sufficient merely to add implements *Serializable* to its declaration. To maintain the singleton guarantee, declare all instance fields *transient* and provide a *readResolve* method. Otherwise, each time a serialized instance is deserialized, a new instance will be created.
+
+```java
+// readResolve method to preserve singleton property
+private Object readResolve() {
+
+     // Return the one true Elvis and let the garbage collector
+
+     // take care of the Elvis impersonator.
+    return INSTANCE;
+}
+```
+
+- Approach 3: A single-element enum
+
+```java
+// Enum singleton - the preferred approach
+public enum Elvis {
+    INSTANCE;
+
+    public void leaveTheBuilding() {
+        System.out.println("Whoa baby, I'm outta here!");
+    }
+
+    // This code would normally appear outside the class!
+    public static void main(String[] args) {
+        Elvis elvis = Elvis.INSTANCE;
+        elvis.leaveTheBuilding();
+    }
+}
+```
+
+### Item 3: Advantages
+
+- **The public field** approach is that the API makes it clear that the class is a singleton:** the public static field is final**, so it will always contain **the same object reference**
+- **The static factory approach** is that it gives you the flexibility to change your mind about whether the class is a singleton without changing its API. The factory method returns the sole instance, but it could be modified to return, say, a separate instance for each thread that invokes it.
+- **Enum** approach is similar to the public field approach, but it is more concise, provides the serialization machinery for free, and provides an ironclad guarantee against multiple instantiation, even in the face of sophisticated serialization or reflection attacks. 
+    > This approach may feel a bit unnatural, but **a single-element enum type is often the best way to implement a singleton**. Note that you can’t use this approach if your singleton must extend a superclass other than Enum (though you can declare an enum to implement interfaces).
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 

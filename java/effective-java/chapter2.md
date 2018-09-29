@@ -3,6 +3,12 @@
 - [ITEM 1: CONSIDER STATIC FACTORY METHODS INSTEAD OF CONSTRUCTORS](#item-1-consider-static-factory-methods-instead-of-constructors)
 - [ITEM 2: CONSIDER A BUILDER WHEN FACED WITH MANY CONSTRUCTOR PARAMETERS](#item-2-consider-a-builder-when-faced-with-many-constructor-parameters)
 - [ITEM 3: ENFORCE THE SINGLETON PROPERTY WITH A PRIVATE CONSTRUCTOR OR AN ENUM TYPE](#item-3-enforce-the-singleton-property-with-a-private-constructor-or-an-enum-type)
+- [ITEM 4: ENFORCE NONINSTANTIABILITY WITH A PRIVATE CONSTRUCTOR](#item-4-enforce-noninstantiability-with-a-private-constructor)
+- [ITEM 5: PREFER DEPENDENCY INJECTION TO HARDWIRING RESOURCES](#item-5-prefer-dependency-injection-to-hardwiring-resources)
+- [ITEM 6: AVOID CREATING UNNECESSARY OBJECTS](#item-6-avoid-creating-unnecessary-objects)
+- [ITEM 7: ELIMINATE OBSOLETE OBJECT REFERENCES](#item-7-eliminate-obsolete-object-references)
+- [ITEM 8: AVOID FINALIZERS AND CLEANERS](#item-8-avoid-finalizers-and-cleaners)
+- [ITEM 9: PREFER TRY-WITH-RESOURCES TO TRY-FINALLY](#item-9-prefer-try-with-resources-to-try-finally)
 
 ## ITEM 1: CONSIDER STATIC FACTORY METHODS INSTEAD OF CONSTRUCTORS
 
@@ -253,33 +259,353 @@ public enum Elvis {
 
 
 
+## ITEM 4: ENFORCE NONINSTANTIABILITY WITH A PRIVATE CONSTRUCTOR
+
+```java
+// Noninstantiable utility class
+
+public class UtilityClass {
+
+    // Suppress default constructor for noninstantiability
+
+    private UtilityClass() {
+
+        throw new AssertionError();
+
+    }
+    ... // Remainder omitted
+}
+```
+
+
+## ITEM 5: PREFER DEPENDENCY INJECTION TO HARDWIRING RESOURCES
+
+Many classes depend on one or **more underlying resources**. 
+    > For example, a spell checker depends on a dictionary. It is not uncommon to see such classes implemented as static utility classes
+
+- Static utility classes and singletons are inappropriate for classes whose **behavior is parameterized by an underlying resource**.
+- A simple pattern that satisfies this requirement is to pass the resource into the **constructor** when **creating a new instance**.
+
+```java
+// Dependency injection provides flexibility and testability
+public class SpellChecker {
+
+    private final Lexicon dictionary;
+
+    public SpellChecker(Lexicon dictionary) {
+
+        this.dictionary = Objects.requireNonNull(dictionary);
+    }
+
+    public boolean isValid(String word) { ... }
+
+    public List<String> suggestions(String typo) { ... }
+}
+```
+
+- It preserves **immutability** , so multiple clients can share dependent objects (assuming the clients desire the same underlying resources). 
+- Dependency injection is equally **applicable** to **constructors, static factories, and builders**.
+
+### Summary
+
+- Do not use a singleton or static utility class to implement a class that **depends on one or more underlying resources** whose behavior affects that of the class, and do not have the class create these resources directly. 
+- Instead, pass the resources, or factories to create them, into the constructor (or static factory or builder). 
+- This practice, known as **dependency injection**, will greatly enhance the **flexibility, reusability, and testability** of a class.
+
+## ITEM 6: AVOID CREATING UNNECESSARY OBJECTS
+
+It is often appropriate to reuse a single object instead of creating a new functionally equivalent object each time it is needed. Reuse can be both faster and more stylish. An object can always be reused if it is immutable.
+
+What **not to do**, consider this statement:
+```java
+String s = new String("bikini");  // DON'T DO THIS!
+```
+
+If this usage occurs in a loop or in a frequently invoked method, millions of String instances can be created needlessly.
+
+**Cache it for reuse**
+
+Some object creations are much more expensive than others. If you’re going to need such an “expensive object” repeatedly, it may be advisable to cache it for reuse. 
+
+```java
+// Performance can be greatly improved!
+static boolean isRomanNumeral(String s) {
+
+    return s.matches("^(?=.)M*(C[MD]|D?C{0,3})"
+
+            + "(X[CL]|L?X{0,3})(I[XV]|V?I{0,3})$");
+
+}
+```
+
+reusing example
+
+```java
+// Reusing expensive object for improved performance
+
+public class RomanNumerals {
+
+    private static final Pattern ROMAN = Pattern.compile(
+
+            "^(?=.)M*(C[MD]|D?C{0,3})"
+
+            + "(X[CL]|L?X{0,3})(I[XV]|V?I{0,3})$");
+
+    static boolean isRomanNumeral(String s) {
+        return ROMAN.matcher(s).matches();
+    }
+}
+```
+
+**Prefer primitives to boxed primitives, and watch out for unintentional autoboxing.**
+
+```java
+// Hideously slow! Can you spot the object creation?
+private static long sum() {
+
+    Long sum = 0L;
+
+    for (long i = 0; i <= Integer.MAX_VALUE; i++)
+
+        sum += i;
+
+    return sum;
+}
+```
+
+## ITEM 7: ELIMINATE OBSOLETE OBJECT REFERENCES
+
+- An obsolete reference is simply a **reference that will never be dereferenced again**. 
+
+
+Can you spot the "memory leak"?
+
+```java
+
+public class Stack {
+    private Object[] elements;
+    private int size = 0;
+    private static final int DEFAULT_INITIAL_CAPACITY = 16;
+
+    public Stack() {
+        elements = new Object[DEFAULT_INITIAL_CAPACITY];
+    }
+
+    public void push(Object e) {
+        ensureCapacity();
+        elements[size++] = e;
+    }
+
+    public Object pop() {
+        if (size == 0)
+            throw new EmptyStackException();
+        return elements[--size];
+    }
+
+    /**
+     * Ensure space for at least one more element, roughly
+     * doubling the capacity each time the array needs to grow.
+     */
+
+    private void ensureCapacity() {
+        if (elements.length == size)
+            elements = Arrays.copyOf(elements, 2 * size + 1);
+    }
+}
+```
+
+- Stack maintains **obsolete references** to these objects. 
+- In this case, any references outside of the “active portion” of the element array are obsolete. 
+- The active portion consists of the elements whose index is less than size.
+
+To fix this: **Eliminate obsolete reference**
+
+```java
+public Object pop() {
+    if (size == 0)
+        throw new EmptyStackException();
+
+    Object result = elements[--size];
+    elements[size] = null; // Eliminate obsolete reference
+
+    return result;
+}
+```
+
+## ITEM 8: AVOID FINALIZERS AND CLEANERS
+
+- Finalizers are unpredictable, often dangerous, and generally unnecessary.
+- Their use can cause erratic behavior, poor performance, and portability problems.
+- The Java 9 replacement for finalizers is cleaners.
+- One shortcoming of finalizers and cleaners is that there is no guarantee they’ll be executed promptly.
+    > Never do anything time-critical in a finalizer or cleaner
+- As a consequence, you should never depend on a finalizer or cleaner to ***update persistent state***.
+
+What to do?
+- Just have your class implement AutoCloseable
+- Require its clients to invoke the close method on each instance when it is no longer needed, typically using try-with-resources to ensure termination even in the face of exceptions 
+
+What, if anything, are cleaners and finalizers good for?
+- One is to act as a **safety net** in case the owner of a resource neglects to call its close method.
+- A second legitimate use of cleaners concerns objects with **native peers**.
+
+Autocloseable class using safety net:
+```java
+import java.lang.ref.Cleaner;
+
+// An autocloseable class using a cleaner as a safety net (Page 32)
+public class Room implements AutoCloseable {
+    private static final Cleaner cleaner = Cleaner.create();
+
+    // Resource that requires cleaning. Must not refer to Room!
+    private static class State implements Runnable {
+        int numJunkPiles; // Number of junk piles in this room
+
+        State(int numJunkPiles) {
+            this.numJunkPiles = numJunkPiles;
+        }
+
+        // Invoked by close method or cleaner
+        @Override public void run() {
+            System.out.println("Cleaning room");
+            numJunkPiles = 0;
+        }
+    }
+
+    // The state of this room, shared with our cleanable
+    private final State state;
+
+    // Our cleanable. Cleans the room when it’s eligible for gc
+    private final Cleaner.Cleanable cleanable;
+
+    public Room(int numJunkPiles) {
+        state = new State(numJunkPiles);
+        cleanable = cleaner.register(this, state);
+    }
+
+    @Override public void close() {
+        cleanable.clean();
+    }
+}
+```
+
+Clients:
+```java
+// Ill-behaved client of resource with cleaner safety-net
+public class Teenager {
+    public static void main(String[] args) {
+        new Room(99);
+        System.out.println("Peace out");
+
+        // Uncomment next line and retest behavior, but note that you MUST NOT depend on this behavior!
+//      System.gc();
+    }
+}
 
 
 
+// Well-behaved client of resource with cleaner safety-net (Page 33)
+public class Adult {
+    public static void main(String[] args) {
+        try (Room myRoom = new Room(7)) {
+            System.out.println("Goodbye");
+        }
+    }
+}
+```
 
+## ITEM 9: PREFER TRY-WITH-RESOURCES TO TRY-FINALLY
 
+- The Java libraries include many resources that must be closed manually by invoking a *close* method. 
+    > Examples include *InputStream*, *OutputStream*, and *java.sql.Connection*. 
+- Closing resources is often overlooked by clients, with predictably dire performance consequences.
 
+Example `try-finally`:
+```java
+import java.io.*;
 
+public class Copy {
+    private static final int BUFFER_SIZE = 8 * 1024;
 
+    // try-finally is ugly when used with more than one resource!
+    static void copy(String src, String dst) throws IOException {
+        InputStream in = new FileInputStream(src);
+        try {
+            OutputStream out = new FileOutputStream(dst);
+            try {
+                byte[] buf = new byte[BUFFER_SIZE];
+                int n;
+                while ((n = in.read(buf)) >= 0)
+                    out.write(buf, 0, n);
+            } finally {
+                out.close();
+            }
+        } finally {
+            in.close();
+        }
+    }
 
+    public static void main(String[] args) throws IOException {
+        String src = args[0];
+        String dst = args[1];
+        copy(src, dst);
+    }
+}
+```
 
+- All of these problems were solved in one fell swoop when Java 7 introduced the ***try-with-resources*** statement. 
+- To be usable with this construct, 
+    - a resource must implement the *AutoCloseable* interface, which consists of a single void-returning *close* method. 
+- Many classes and interfaces in the Java libraries and in third-party libraries now implement or extend *AutoCloseable*. 
+- If you write a class that represents a resource that must be closed, your class should implement *AutoCloseable* too.
 
+Example `try-with-resources`:
+```java
+import java.io.*;
 
+public class Copy {
+    private static final int BUFFER_SIZE = 8 * 1024;
 
+    // try-with-resources on multiple resources - short and sweet
+    static void copy(String src, String dst) throws IOException {
+        try (InputStream   in = new FileInputStream(src);
+             OutputStream out = new FileOutputStream(dst)) {
+            byte[] buf = new byte[BUFFER_SIZE];
+            int n;
+            while ((n = in.read(buf)) >= 0)
+                out.write(buf, 0, n);
+        }
+    }
 
+    public static void main(String[] args) throws IOException {
+        String src = args[0];
+        String dst = args[1];
+        copy(src, dst);
+    }
+}
+```
 
+You can put ***catch*** clauses on *try-with-resources* statements, just as you can on regular *try-finally* statements.
 
+```java
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
+public class TopLineWithDefault {
+    // try-with-resources with a catch clause  (Page 36)
+    static String firstLineOfFile(String path, String defaultVal) {
+        try (BufferedReader br = new BufferedReader(
+                new FileReader(path))) {
+            return br.readLine();
+        } catch (IOException e) {
+            return defaultVal;
+        }
+    }
 
-
-
-
-
-
-
-
-
-
-
-
-
+    public static void main(String[] args) throws IOException {
+        String path = args[0];
+        System.out.println(firstLineOfFile(path, "Toppy McTopFace"));
+    }
+}
+```

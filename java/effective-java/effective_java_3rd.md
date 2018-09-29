@@ -42,3 +42,8 @@ Book
 - A singleton is simply a class that is instantiated exactly once. 
 - Singletons typically represent either a stateless object such as a *function* or a *system component* that is intrinsically unique. 
 - Making a class a singleton can make it difficult to test its clients because it’s impossible to substitute a mock implementation for a singleton unless it implements an interface that serves as its type.
+
+## Adapters
+
+- Also known as views. 
+- An adapter is an object that delegates to a backing object, providing an alternative interface. Because an adapter has **no state** beyond that of its backing object, there’s no need to create more than one instance of a given adapter to a given object.

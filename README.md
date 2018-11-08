@@ -11,3 +11,4 @@
   - [ACID Database](https://medium.com/@singhal.amogh1995/breaking-down-acid-and-transactions-in-databases-cd206db7dd8b)
   - [SQL and NoSQL](https://medium.com/xplenty-blog/the-sql-vs-nosql-difference-mysql-vs-mongodb-32c9980e67b2)
 - [Blockchain](https://medium.com/mindorks/what-is-blockchain-simplest-introduction-to-the-blockchain-764a468e1575)
+- [false negative, false positive](https://www.quora.com/What-is-the-best-example-for-false-negative-false-positive-true-negative-and-true-positive-in-machine-learning)
